@@ -1,0 +1,18 @@
+<div id = "welcome">
+<h1>Welocme to The Store</h1>
+</div>
+<button id = "login" (click) = "toLogIn()"> Login</button>
+<br>
+<button id = "signup" (click) = "toSignUp()">Sign-Up</button>
+
+<h2>
+    Items
+</h2>
+<ul>
+    <li *ngFor="let item of response">
+    {{item.name}}
+    {{item.price}}
+    {{item.tax}}
+    {{item.quantity}}
+    </li>
+</ul>
