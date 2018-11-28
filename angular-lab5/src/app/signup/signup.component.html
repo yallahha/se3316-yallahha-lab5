@@ -1,3 +1,12 @@
-<p>
-  signup works!
-</p>
+<div align = "center">
+    <h1>
+        Create a new User
+    </h1>
+
+
+    <label> Email: </label>
+    <input type= "email" #email required/><br>
+    <label> Password: </label>
+    <input type="password" #password required/><br>
+    <button (click) = "NewUser(email.value, password.value)">Sign up</button>
+</div>

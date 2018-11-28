@@ -1,18 +1,23 @@
 <div id = "welcome">
-<h1>Welocme to The Store</h1>
+<h1>Welocme to Yaz's Store</h1>
 </div>
+<p> This custom store provides Users to comment and review items while navitigating through a catologue</p>
+<div align = "right">
 <button id = "login" (click) = "toLogIn()"> Login</button>
-<br>
 <button id = "signup" (click) = "toSignUp()">Sign-Up</button>
-
+</div>
 <h2>
     Items
 </h2>
 <ul>
     <li *ngFor="let item of response">
-    {{item.name}}
-    {{item.price}}
-    {{item.tax}}
-    {{item.quantity}}
+    <label>Item: </label>
+    {{item.name}} <br>
+    <label>Price: </label> 
+    {{item.price}} <br>
+    <label>Tax: </label>
+    {{item.tax}} <br>
+    <label>Quantity: </label> 
+    {{item.quantity}} <br>
     </li>
 </ul>

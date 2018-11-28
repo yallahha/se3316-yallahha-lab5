@@ -25,6 +25,9 @@ export class HomepageComponent implements OnInit {
   toSignUp(){
     this._router.navigateByUrl('signup');
   }
+  ShowAbout(){
+    Document[0].getElmentById('blurb').style = "display:block";
+  }
   
    onResponse(res: Observable<any[]>) {
     this.response = res;
