@@ -3,10 +3,14 @@
         Create a new User
     </h1>
 
-
-    <label> Email: </label>
-    <input type= "email" #email required/><br>
-    <label> Password: </label>
-    <input type="password" #password required/><br>
-    <button (click) = "NewUser(email.value, password.value)">Sign up</button>
+    <form #signupForm = "ngForm">
+    Email: <input #email  type= "email" ngModel name = "email" required email><br>
+        <p style = "color:red" *ngIf = "!signupForm.valid" >
+        Please enter a valid email
+        </p>
+        <label> Password: </label>
+        
+    <input type="password"  #password required password/><br>
+    <button [disabled] = "!signupForm.valid" (click) = "NewUser(email.value, password.value)">Sign up</button>
+   </form>
 </div>

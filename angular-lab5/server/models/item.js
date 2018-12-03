@@ -5,7 +5,10 @@ var ItemSchema   = new Schema({
     name: String,
     price: Number,
     tax: Number,
-    quantity: Number
+    quantity: Number,
+    description : String,
+    sales: Number,
+    _id: String
 });
 
 

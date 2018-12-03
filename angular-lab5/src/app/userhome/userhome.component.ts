@@ -13,7 +13,7 @@ export class UserhomeComponent implements OnInit {
   ngOnInit() {
   }
     Logout(){
-    this._router.navigateByUrl('');
+    this.router.navigateByUrl('');
   }
 
 }

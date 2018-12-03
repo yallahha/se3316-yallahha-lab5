@@ -18,6 +18,7 @@ mongoose.connect('mongodb://yallahha-se3316-yallahha-lab5-6575307:27017/items', 
 var Item    = require('./models/item');
 var User = require('./models/user');
 var validator = require('validator'); 
+var Review = require('./models/review');
 //var User = require('./models/userModel');
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
@@ -29,7 +30,8 @@ var smtpTransport = nodemailer.createTransport({
         pass: 'passtheball123'
     }
 });
-var rand,mailOptions,host,link;
+
+var randomNum,mailOptions,host,link;
 
 
 var port = 8081;        // set our port
@@ -60,6 +62,8 @@ router.route('/items')
             item.price = req.body.price;
             item.tax = req.body.tax;
             item.quantity = req.body.quantity;
+            item.description = req.body.description;
+            item.sales = req.body.sales;
         
         item.save(function(err) {
             if (err){
@@ -79,6 +83,7 @@ router.route('/items')
         });
 
     });
+    
     router.route('/items/:item_id')
 
     //GET for ONE 
@@ -101,8 +106,13 @@ router.route('/items')
             }
             //item.name = req.body.name;  // update the bears info
             //item.price = req.body.price;
+            item.name = req.body.name; 
+            item.price = req.body.price;
             item.tax = req.body.tax;
             item.quantity = req.body.quantity;
+            item.description = req.body.description;
+            item.sales = req.body.sales;
+            
 
             // save the bear
             item.save(function(err) {
@@ -126,6 +136,7 @@ router.route('/items')
         });
     });
     
+    
 router.route('/signup')
     .post(function(req,res){
         console.log(req);
@@ -134,7 +145,7 @@ router.route('/signup')
         console.log(email);
         //checks if the email is valid
         if(!validator.isEmail(email) || email == ""){
-            return res.send({message: "Invalid email"});
+            return res.send({message: "Incorrect email"});
         }
     //getting 
         var psw = req.body.psw;
@@ -144,16 +155,20 @@ router.route('/signup')
         }
         var salt = bcrypt.genSaltSync(saltRounds);  
         var hash = bcrypt.hashSync(psw, salt); 
-        
-        //generating random code for user verification
         var code = randomstring.generate(); 
+        randomNum= Math.floor((Math.random() * 100) + 54);
+        host = req.get('host');
+        link="http://"+req.get('host')+"/verify?id="+randomNum;
+        
         
         //creates new account instance
         var newUser = new User({
-            email : email, password: hash, code : code, loggedIn : false 
+            email : email, password: hash, Isverified: false, code: code, loggedIn : false 
         });
         User.find({'email':email}, function(err, account){
             if(account[0] == null){
+                
+            
                 //if the email isnt in use go forward with crerating account
                 newUser.save(function(err){
                     if(err){
@@ -171,8 +186,8 @@ router.route('/signup')
          mailOptions={
             to : req.body.email,
             subject : "Please confirm your Email account",
-            html : "Use this code to verify your email: " + newUser.code
-        };
+            html : "Hello,<br> Please Click on the link to verify your email.<br><a href="+link+">Click here to verify</a>" + newUser.code
+    }
         smtpTransport.sendMail(mailOptions, function(error, response){
              if(error){
                 console.log(error);
@@ -191,15 +206,50 @@ router.route('/signup')
           res.json(accounts); 
         });
     });
-
+    
+/*
 router.route('/verify') 
 
     .post((req, res) => {
+        console.log(req.protocol+":/"+req.get('host'));
         //getting code from body
-        const {code} = req.body; 
+        //const {code} = req.body; 
 
         //find the account which matches the varification code
-        User.find({code : code}, (err, acc)=>{
+       if((req.protocol+"://"+req.get('host'))==("http://"+host))
+{
+    console.log("Domain is matched. Information is from Authentic email");
+    if(req.query.id==rand)
+    {
+        console.log("email is verified");
+        res.send({message : 'verification success'});
+        res.end("<h1>Email "+mailOptions.email+" is been Successfully verified");
+        Isverified : true;
+    }
+    else
+    {
+        console.log("email is not verified");
+        res.send("<h1>Bad Request</h1>");
+    }
+}
+else
+{
+    res.end("<h1>Request is from unknown source");
+}
+    }); 
+    */
+    app.get('/verify?id=' +randomNum,function(req,res){
+        
+    if((req.protocol+"://"+req.get('host'))==("https://"+host))
+    {
+    console.log("Domain is matched. Information is from Authentic email");
+    if(req.query.randomNum==randomNum)
+    {
+        //else sets user to logged in
+        const {code} = req.body;
+        console.log({code});
+         host = req.get('host');
+        User.find({code : code},(err, acc)=>{
             if(err){
                 return res.send(err); 
             }
@@ -210,20 +260,36 @@ router.route('/verify')
             }
             
             //else sets user to logged in
-            acc[0]['loggedIn'] = true; 
+            acc[0]['Isverified'] == true; 
             
             //sets verification code to empty string
-            acc[0]['code'] = ''; 
+            acc[0]['loggedIn'] == true; 
             
             //saves account
             acc[0].save((err)=> {
                 if(err){
                     return res.send(err); 
                 }
+                
                 return res.send({message: 'verification success'}); 
             });
         }); 
-    }); 
+       
+            res.end("<h1>Email "+mailOptions.to+" is been Successfully verified");
+    }
+    
+    else
+    {
+        console.log("email is not verified");
+        res.end("<h1>Bad Request</h1>");
+    }
+}
+else
+{
+    res.end("<h1>Request is from unknown source");
+}
+});
+
     router.route('/login')
 
     .post(function(req, res){
@@ -267,6 +333,42 @@ router.route('/verify')
                 
             });
         }
+    });
+router.route('/reviews/:itemname')
+    .get(function(req,res){
+       Review.find({itemName:req.params.itemname},function(err, reviews){
+           if(err){
+               res.send(err); 
+           }
+          res.json(reviews); 
+        });
+    });
+    
+router.route('/reviews')
+.get(function(req, res) {
+        Review.find(function(err, reviews) {
+            //Item.name = req.body.name;
+            if (err){
+                 res.send(err);
+            }
+            res.json(reviews);
+        });
+
+    })
+    .post(function(req, res) {
+        var review = new Review();
+         review.rating = req.body.rating; 
+            review.comment = req.body.comment;
+            review.user = req.body.user;
+            review.itemName = req.body.itemName;
+            
+        
+        review.save(function(err) {
+            if (err){
+               res.send(err);
+            }
+            res.json({ message: 'Review Created!' });
+        });
     });
     
 

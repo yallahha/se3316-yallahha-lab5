@@ -1,3 +1,14 @@
 #welcome{
     text-align: center;
 }
+.parent{
+    display: flex;
+    list-style-type: none;
+}
+.details{
+    text-align: center;
+    list-style-type: none;
+}
+.sub{
+    display: flex
+}

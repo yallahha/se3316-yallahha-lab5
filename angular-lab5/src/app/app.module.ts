@@ -11,6 +11,7 @@ import { VerifyUserComponent } from './verify-user/verify-user.component';
 import { UserhomeComponent } from './userhome/userhome.component';
 import {BrowserAnimationsModule} from '@angular/platform-browser/animations';
 import {FormsModule} from "@angular/forms";
+import { ManagerComponent } from './manager/manager.component';
 
 
 @NgModule({
@@ -20,7 +21,8 @@ import {FormsModule} from "@angular/forms";
     LoginComponent,
     SignupComponent,
     VerifyUserComponent,
-    UserhomeComponent
+    UserhomeComponent,
+    ManagerComponent
     
   ],
   imports: [

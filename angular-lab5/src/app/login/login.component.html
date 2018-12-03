@@ -1,6 +1,11 @@
 <h1>Login</h1>
-<label> Username: </label>
-<input #username type="text" placeholder = "Username"/>
-<label> Password: </label>
-<input id = "pass" #password type = "password" placeholder = "********" > <br>
-<button (click) = "submit(username.value, password.value)">Submit</button>
+<form #signupForm = "ngForm">
+    Email: <input #username  type= "email" ngModel name = "email" required email><br>
+        <p style = "color:red" *ngIf = "!signupForm.valid" >
+        Please enter a valid email
+        </p>
+        <label> Password: </label>
+        
+    <input type="password"  #password required password/><br>
+    <button [disabled] = "!signupForm.valid" (click) = "submit(username.value, password.value)">Login</button>
+   </form>

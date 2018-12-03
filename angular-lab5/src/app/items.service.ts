@@ -17,5 +17,13 @@ constructor(private http: HttpClient) { }
           console.log("POST success!");
           callback_fun(data);
       });
+      
+  }
+  getReviews(callback_fun, fname: string){
+    this.http.get('/api/reviews/' + fname).subscribe(data => {
+        var review = JSON.stringify(data);
+        console.log(review);
+         callback_fun(data);
+      });
   }
 }

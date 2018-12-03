@@ -11,7 +11,12 @@ export class VerifyUserComponent implements OnInit {
 
   constructor(private router: Router, private emailService : EmailService) { }
   response = '';
+  id;
   ngOnInit() {
+     var url = this.router.url;
+    
+    //use substring to get the username and the msg room ID
+    this.id= url.substr((url.indexOf('?')+1), url.length);
      providers: [EmailService]
   }
   
@@ -24,6 +29,9 @@ export class VerifyUserComponent implements OnInit {
       console.log('sss')
       this.router.navigateByUrl('login'); 
     }
+  }
+  backToLogin(){
+    this.router.navigateByUrl('login');
   }
   
 }

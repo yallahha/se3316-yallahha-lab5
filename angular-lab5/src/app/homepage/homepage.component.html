@@ -1,23 +1,53 @@
 <div id = "welcome">
-<h1>Welocme to Yaz's Store</h1>
+<h1>Welcome to Yaz's Store</h1>
 </div>
 <p> This custom store provides Users to comment and review items while navitigating through a catologue</p>
 <div align = "right">
 <button id = "login" (click) = "toLogIn()"> Login</button>
 <button id = "signup" (click) = "toSignUp()">Sign-Up</button>
+<button (click) = viewAllItems()> View Entire Catologue</button>
 </div>
 <h2>
     Items
 </h2>
-<ul>
-    <li *ngFor="let item of response">
-    <label>Item: </label>
+<div class = "parent">
+    <ul class = "items">
+    <li class = "itemList" *ngFor="let item of response" [class.selected] = "item === selectedItem" (click) = "onSelect(item)">
+    <b>Item:</b>
     {{item.name}} <br>
-    <label>Price: </label> 
-    {{item.price}} <br>
-    <label>Tax: </label>
+     <br>
+    <b>Tax: </b>
     {{item.tax}} <br>
-    <label>Quantity: </label> 
+    <br>
+   <b> Quantity:</b> 
     {{item.quantity}} <br>
+     <br>
+    <b> id:</b> 
+    {{item._id}} <br>
+    <br>
+    <b> Sales:</b> 
+    {{item.sales}} <br>
+    <br>
     </li>
-</ul>
+    </ul>
+</div>
+
+    <ng-container *ngIf="show">
+    <div class = "sub" >
+    <ul class = "details">
+    <li ng-repeat="let item of response">  
+    <b>Price:</b>
+    {{selectedItem.price}} <br>
+    <b>Description:</b>
+    {{selectedItem.description}} <br>
+    <b>Reviews:</b>
+    
+    <p *ngFor="let review of response">
+        Rating: {{review.rating}} <br><br>
+        Comment: {{review.comment}}<br><br>
+        User: {{review.user}} <br> <br>
+        </p>
+    </li>
+    </ul>
+    </div>
+    </ng-container>

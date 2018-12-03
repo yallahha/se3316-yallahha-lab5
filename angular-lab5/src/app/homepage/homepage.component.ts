@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import {Router} from '@angular/router';
 import {ItemsService} from '../items.service';
 import { Observable } from 'rxjs';
+import {Item} from "../../../server/models/item";
 @Component({
   selector: 'app-homepage',
   templateUrl: './homepage.component.html',
@@ -9,6 +10,9 @@ import { Observable } from 'rxjs';
 })
 export class HomepageComponent implements OnInit {
   private response : Observable<any[]>;
+  public selected: boolean = false;
+  show;
+  reviewshow;
   constructor(private _router: Router, private itemsService: ItemsService) { }
 
   ngOnInit() {
@@ -25,16 +29,26 @@ export class HomepageComponent implements OnInit {
   toSignUp(){
     this._router.navigateByUrl('signup');
   }
-  ShowAbout(){
-    Document[0].getElmentById('blurb').style = "display:block";
-  }
   
    onResponse(res: Observable<any[]>) {
     this.response = res;
-  }
+   }
   addItem(fruitname : string, pricefruit : number, taxfruit: number, quantityfruit : number){
       this.itemsService.Adddata(this.onResponse.bind(this), fruitname, pricefruit, taxfruit, quantityfruit);    
   }
-
+  selectedItem: Item;
+  onSelect(item: Item): void{
+   this.show = !this.show;
+  
+    this.selectedItem = item; 
+    this.itemsService.getReviews(this.onResponse.bind(this), this.selectedItem.name);
+    
+    
+  }
+  viewAllItems(){
+    
+    
+  }
+  
 
 }

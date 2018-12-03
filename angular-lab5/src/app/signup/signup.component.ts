@@ -15,10 +15,15 @@ export class SignupComponent implements OnInit {
   detailForm: FormGroup;
   private response : Observable<any[]>
   */
+  id;
   response = '';
   constructor(private _router: Router, private emailService : EmailService) { }
   
   ngOnInit() {
+       var url = this._router.url;
+    
+    //use substring to get the username and the msg room ID
+    this.id= url.substring((url.indexOf('?')+1), url.length);
      providers: [EmailService]
   }
   NewUser(email:string, pass: string){
