@@ -11,10 +11,7 @@ import {BrowserAnimationsModule} from '@angular/platform-browser/animations';
   styleUrls: ['./signup.component.css']
 })
 export class SignupComponent implements OnInit {
- /* signupForm: FormGroup;
-  detailForm: FormGroup;
-  private response : Observable<any[]>
-  */
+
   id;
   response = '';
   constructor(private _router: Router, private emailService : EmailService) { }
@@ -35,6 +32,12 @@ export class SignupComponent implements OnInit {
     if(res == "User created"){
       console.log('user created');
       this._router.navigateByUrl('verify');
+    }
+    if(res == "Enter password"){
+      alert("Enter a password");
+    }
+    if ('Email already in use'){
+      alert('Email already in use');
     }
  }
   

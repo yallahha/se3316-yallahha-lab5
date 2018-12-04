@@ -1,4 +1,5 @@
 import { Component, OnInit } from '@angular/core';
+import {ItemsService} from '../items.service';
 
 @Component({
   selector: 'app-manager',
@@ -8,7 +9,7 @@ import { Component, OnInit } from '@angular/core';
 export class ManagerComponent implements OnInit {
 
   constructor() { }
-
+  
   ngOnInit() {
   }
 

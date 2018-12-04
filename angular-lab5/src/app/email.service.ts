@@ -2,6 +2,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import {Router} from '@angular/router';
 import {Observable} from 'rxjs';
+
 //import 'rxjs/add/operator/switchMap';
 @Injectable({
   providedIn: 'root'
@@ -24,18 +25,14 @@ export class EmailService {
 //Creating an account
  createAccount(callback_fun, email, psw){
         console.log(email, psw);
-        this.http.post('/api/signup', {'email' : email, 'psw' : psw}).subscribe(data=>{
+        this.http.post('/api/signup', {'email' : email, 'password' : psw}).subscribe(data=>{
             callback_fun(data['message']);
         }); 
     }
   //validates account
-  postValidate(callback_fun, email, psw){
+  Validate(callback_fun, email, psw){
       this.http.post('/api/login', {'email' : email, 'psw' : psw}).subscribe(data=>{
           console.log(data);
-            //special case for admin login
-            if (data['message'] == 'admin') {
-                localStorage.setItem('user', 'admin');
-            }
             if(data['email'] != null){
                 callback_fun(data['message']); 
                 localStorage.setItem('user', JSON.stringify(data['email']));
@@ -46,12 +43,11 @@ export class EmailService {
             }
         }); 
     }
-    //sends verification code
-    verifyEmail(callback, code){
-        this.http.post('/api/verify', {'code': code}).subscribe(data=>{
+  /*  //ends verification code
+    verifyEmail(callback){
+        this.http.get('/api/verif').subscribe(data=>{
             callback(data['message']); 
         });
-    }
- 
+    }*/
 }
  

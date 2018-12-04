@@ -12,18 +12,28 @@ export class LoginComponent implements OnInit {
   private response = '';
   constructor(private email: EmailService, private router:Router ) { }
   submit(username: string, password:string){
-   this.email.postValidate(this.onResponse.bind(this), username, password);
+   this.email.Validate(this.onResponse.bind(this), username, password);
   console.log(username, password);
+  var user = username;
+  console.log(username);
   }
   ngOnInit() {
   }
+  
+  
  onResponse(res: string) {
    this.response = res;
    if(res=="success"){
-      this.router.navigateByUrl('userhome')
+      this.router.navigateByUrl('userhome');
     }
-    else if (res == "admin"){
-      this.router.navigateByUrl('admin')
+    if(res == "Username is invalid"){
+        alert('Username is invalid');
+    }
+    if(res == "You must verify your account"){
+        alert('You must verify your account');
+    }
+    if(res == "Password is invalid"){
+        alert('Password is invalid');
     }
   }
 }

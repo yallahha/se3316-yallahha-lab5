@@ -3,9 +3,10 @@ var Schema       = mongoose.Schema;
 var UserSchema   = new Schema({
     email: String,
     password: String,
-    Isverified : Boolean,
-    code: String,
-    loggedIn: Boolean
+    loggedIn: Boolean,
+    isVerified: Boolean,
+    isAdmin: Boolean,
+    verificationCode: String
 });
 
 

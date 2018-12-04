@@ -19,14 +19,14 @@ export class VerifyUserComponent implements OnInit {
     this.id= url.substr((url.indexOf('?')+1), url.length);
      providers: [EmailService]
   }
-  
+/*  
   checkCode(code: string){
     this.emailService.verifyEmail(this.onResponse.bind(this), code);
   }
+  */
     onResponse(res: string){
     this.response = res; 
     if(res == "verification success"){
-      console.log('sss')
       this.router.navigateByUrl('login'); 
     }
   }

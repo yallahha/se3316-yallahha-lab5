@@ -7,7 +7,7 @@
 var express    = require('express');        
 var app        = express();                 
 var bodyParser = require('body-parser');
-var bcrypt = require('bcrypt'); 
+var bcrypt = require('bcryptjs'); 
 var nodemailer = require('nodemailer');
 var mongoose   = require('mongoose');
 var randomstring = require('randomstring');
@@ -19,6 +19,7 @@ var Item    = require('./models/item');
 var User = require('./models/user');
 var validator = require('validator'); 
 var Review = require('./models/review');
+var Collection = require('./models/CartCollection');
 //var User = require('./models/userModel');
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
@@ -52,6 +53,7 @@ router.get('/', function(req, res) {
     res.json({ message: 'hooray! welcome to our api!' });   
 });
 //ROUTE FOR /items
+
 router.route('/items')
 
 
@@ -64,6 +66,8 @@ router.route('/items')
             item.quantity = req.body.quantity;
             item.description = req.body.description;
             item.sales = req.body.sales;
+            item.comments= req.body.comments;
+            item.ratings=req.body.ratings;
         
         item.save(function(err) {
             if (err){
@@ -84,6 +88,7 @@ router.route('/items')
 
     });
     
+   
     router.route('/items/:item_id')
 
     //GET for ONE 
@@ -148,22 +153,28 @@ router.route('/signup')
             return res.send({message: "Incorrect email"});
         }
     //getting 
-        var psw = req.body.psw;
+        var password = req.body.password;
         //ensures password is not empty
-        if(psw == ""){
+        if(password== ""){
             return res.send({message: "Enter password"});
         }
         var salt = bcrypt.genSaltSync(saltRounds);  
-        var hash = bcrypt.hashSync(psw, salt); 
-        var code = randomstring.generate(); 
-        randomNum= Math.floor((Math.random() * 100) + 54);
+        var hash = bcrypt.hashSync(password, salt); 
+    var code = randomstring.generate(); 
+  //  randomNum= Math.floor((Math.random() * 100) + 54);
         host = req.get('host');
-        link="http://"+req.get('host')+"/verify?id="+randomNum;
+       link="https://"+req.get('host')+"/api/verify/"+code;
+       var verificationCode = code;
         
         
         //creates new account instance
         var newUser = new User({
-            email : email, password: hash, Isverified: false, code: code, loggedIn : false 
+            email : email,
+            password: hash, 
+            loggedIn : false, 
+            isAdmin: false,
+            isVerified: false,
+            verificationCode: verificationCode
         });
         User.find({'email':email}, function(err, account){
             if(account[0] == null){
@@ -186,17 +197,16 @@ router.route('/signup')
          mailOptions={
             to : req.body.email,
             subject : "Please confirm your Email account",
-            html : "Hello,<br> Please Click on the link to verify your email.<br><a href="+link+">Click here to verify</a>" + newUser.code
+            html : "Hello,<br> Please Click on the link to verify your email. " + link
     }
         smtpTransport.sendMail(mailOptions, function(error, response){
              if(error){
                 console.log(error);
-                res.end("error");
+                res.send("error");
              }else{
                 res.end("email sent");
              }
         });
-        
 })
 .get(function(req,res){
        User.find(function(err, accounts){
@@ -207,170 +217,295 @@ router.route('/signup')
         });
     });
     
-/*
-router.route('/verify') 
 
-    .post((req, res) => {
-        console.log(req.protocol+":/"+req.get('host'));
-        //getting code from body
-        //const {code} = req.body; 
-
-        //find the account which matches the varification code
-       if((req.protocol+"://"+req.get('host'))==("http://"+host))
-{
-    console.log("Domain is matched. Information is from Authentic email");
-    if(req.query.id==rand)
-    {
-        console.log("email is verified");
-        res.send({message : 'verification success'});
-        res.end("<h1>Email "+mailOptions.email+" is been Successfully verified");
-        Isverified : true;
-    }
-    else
-    {
-        console.log("email is not verified");
-        res.send("<h1>Bad Request</h1>");
-    }
-}
-else
-{
-    res.end("<h1>Request is from unknown source");
-}
-    }); 
-    */
-    app.get('/verify?id=' +randomNum,function(req,res){
-        
-    if((req.protocol+"://"+req.get('host'))==("https://"+host))
-    {
-    console.log("Domain is matched. Information is from Authentic email");
-    if(req.query.randomNum==randomNum)
-    {
-        //else sets user to logged in
-        const {code} = req.body;
-        console.log({code});
-         host = req.get('host');
-        User.find({code : code},(err, acc)=>{
+    ///VERIFIY EMAIL
+    router.route('/verify/:id')
+    .get(function(req,res){
+        User.findOne({verificationCode: req.params.id}, function (err, accFound){
+             if(accFound != null){
+            accFound.isVerified = true;
+            //console.log(acc);
+            accFound.save(function(err, accFound){
             if(err){
-                return res.send(err); 
+               // return res.send(err); 
             }
-            
-            //Checks if the account matching the code exists
-            if(acc[0] == null){
-                return res.send({message:'No user found'}); 
-            }
-            
-            //else sets user to logged in
-            acc[0]['Isverified'] == true; 
-            
-            //sets verification code to empty string
-            acc[0]['loggedIn'] == true; 
-            
-            //saves account
-            acc[0].save((err)=> {
-                if(err){
-                    return res.send(err); 
-                }
-                
-                return res.send({message: 'verification success'}); 
+            res.end("<h2>You have verified your account!!</h2>");
             });
-        }); 
-       
-            res.end("<h1>Email "+mailOptions.to+" is been Successfully verified");
-    }
-    
-    else
-    {
-        console.log("email is not verified");
-        res.end("<h1>Bad Request</h1>");
-    }
-}
-else
-{
-    res.end("<h1>Request is from unknown source");
-}
+            }
+    });
+            
 });
+	
+       
+            //res.send("Email "+mailOptions.to+" is been Successfully verified");
 
     router.route('/login')
 
     .post(function(req, res){
         
         //getting email and password form service
-        var email = req.body.email, psw = req.body.psw;
+        var email = req.body.email, password = req.body.password;
         
         //checks if password is empty
-        if(psw == ""){
+        if(password == ""){
             return res.json({message: 'Password is invalid'}); 
         }
-        
-        //special case for admin login
-        if(email == "admin" && psw == "admin") {
-            res.send({message:'admin'});
-        }
-        else {//if admin credentials have not been entered
-            User.find({email:email}, function(err, account){
+        //if admin credentials have not been entered
+            User.findOne({email:email}, function(err, accountFound){
                 
                 //checking the username 
-                if(account[0] == null){
+                if(accountFound == null){
                     return res.json({message: 'Username is invalid'}); 
                 }
                 
-                //validating the password with bcrypt
-                var valid = bcrypt.compareSync(psw, account[0]['password']);
-                if(!valid){
-                    return res.json({message: 'Password is invalid'}); 
-                }
-                
-                //Confirming the account has been verified 
-                if(!(account[0]['loggedIn'])){
+               //Confirming the account has been verified 
+                if(!(accountFound.isVerified)){
                     return res.json({message: 'You must verify your account'}); 
                 }
-                
+                if(accountFound != null){
+                accountFound.loggedIn = true;
+                //console.log(acc);
+                accountFound.save(function(err, accountFound){
                 if(err){
-                    return res.send(err); 
+               // return res.send(err); 
                 }
-                
-                res.send({message:'success', email: account[0]['email']}); 
-                
+             res.send({message:'success', email: accountFound.email});
             });
         }
     });
-router.route('/reviews/:itemname')
+});
+//GETTING A REVIEW FOR AN ITEM
+router.route('/reviews/:name')
     .get(function(req,res){
-       Review.find({itemName:req.params.itemname},function(err, reviews){
+       Item.find({name:req.params.name},function(err, reviews){
            if(err){
                res.send(err); 
            }
           res.json(reviews); 
         });
-    });
-    
-router.route('/reviews')
-.get(function(req, res) {
-        Review.find(function(err, reviews) {
-            //Item.name = req.body.name;
-            if (err){
-                 res.send(err);
-            }
-            res.json(reviews);
-        });
-
     })
     .post(function(req, res) {
-        var review = new Review();
-         review.rating = req.body.rating; 
-            review.comment = req.body.comment;
-            review.user = req.body.user;
-            review.itemName = req.body.itemName;
+        var user = req.body.email;
+        Item.findOne({name:req.params.name}, function(err, itemFound) {
             
+        if(itemFound.comments[4] == null){
+            if(req.body.comment == null){
+                 return res.json({message: 'You must enter a comment and a rating'}); 
+            }
+          itemFound.comments.push(req.body.comment + JSON.stringify(user));
+            itemFound.ratings.push(req.body.rating);  
         
-        review.save(function(err) {
+        
+        itemFound.save(function(err) {
             if (err){
                res.send(err);
             }
-            res.json({ message: 'Review Created!' });
+            res.json({ message: 'Item created!' });
+        });
+        }
+        else{
+            return res.json({message: 'Limit of comments was reached'}); 
+        }
+        });
+    });
+//CREATING A COLLECTION
+router.route('/newCollection')
+
+    .post(function(req, res){
+        
+        //getting user, name and password form service
+        var cartUser = req.body.cartUser, cartName = req.body.cartName, desc = req.body.desc;    
+        
+        //Checking if there is already a collection with the same name and user
+        Collection.find({ cartUser : cartUser, cartName : cartName}, function(err, collections){
+            
+            if(err){
+                return res.send(err);
+            }
+            //Check if Collection is already created with that same name
+            if(!(collections[0]==null)){
+                return res.json({message: "You already have a duplicate name collection"}); 
+            }
+            
+            //else creates a new collection with req body values
+            var collect= new Collection();
+            collect.cartUser= cartUser;
+            collect.cartName= cartName;
+            collect.desc = desc;
+            collect.isprivate= true;
+            
+            collect.save(function(err){
+                if(err)
+                    return res.send(err);
+                
+                res.json({message: 'success'});
+            });
+            
         });
     });
     
+    //ROUTE TO GET ALL COLLECTIONS AND POST 
+router.route('/getAllCollections')
+    //Post 
+    .post((req, res)=> {
+        //getting user from service
+        var cartUser = req.body.cartUser;
+        //finding all collections from that user
+        Collection.find({cartUser : cartUser}, (err, col)=>{
+            if(err){
+                return res.send(err);
+            }
+            return res.send(col); 
+            
+        }); 
+        
+    })
+    //Get All
+    .get(function(req,res){
+       Collection.find(function(err, collections){
+           if(err){
+               res.send(err); 
+           }
+          res.json(collections); 
+        });
+    });
+    //ADD an item to the collection
+router.route('/addtoCollection')
+
+    .post((req, res)=>{
+        //getting user, image and collection name from service
+        var cartUser = req.body.cartUser,cartName = req.body.cartName; 
+        
+        //checks if collection exists
+        Collection.find({cartUser : cartUser, cartName : cartName}, (err, collections)=>{
+            
+            if(err){
+                return res.send(err); 
+            }
+            
+            if(collections[0] == null){
+                return res.send({message : "no collection"}); 
+            }
+            
+            //else push image 
+            collections[0].save((err)=>{
+                if(err){
+                    return res.send(err);
+                }
+                return res.send({message : "success"}); 
+            }); 
+            
+        }); 
+        
+    });
+    
+router.route('/deleteItemCollection')
+
+    .post((req, res)=> {
+        //getting user, image, name of the collaction from service
+        var cartUser = req.body.cartUser,  cartName = req.body.cartName;
+
+        //finding collection from user
+        Collection.find({cartUser : cartUser, cartName : cartName}, (err, col)=>{
+            console.log(col[0]);
+            if(err){
+                return res.send(err); 
+            }
+            
+            
+            //checking if collection exists
+            if(col[0] == null){
+                return res.send({message : "no collection"}); 
+            }
+            
+            col[0].save((err)=>{
+                if(err){
+                    return res.send(err); 
+                }
+                return res.send({message : "success"}); 
+            }); 
+            
+        }); 
+    })
+
+router.route('/deleteCollection:id')
+
+    .delete((req, res) => {
+        
+        //finding collection by id and deleting
+        Collection.remove({_id: req.params.id}, (err, col)=> {
+            if (err) {
+                return res.send(err);
+            }
+            return res.send({message : "success"}); 
+        })
+    })
+
+router.route('/saveCollection')
+
+    .put((req, res)=> {
+        //getting user the old name of the collection, the new name of the collection and the description of the collection
+        var cartUser = req.body.user, oldname = req.body.oldname, cartName = req.body.cartName, desc = req.body.desc;
+        
+        console.log('server oldname & user', oldname, cartUser);
+        Collection.find({cartUser : cartUser, cartName : oldname}, (err, col)=>{
+            if(err){
+                return res.send(err); 
+            }
+            
+            //saving new name and description for collection
+            col[0]['desc'] = desc;
+            col[0]['cartName'] = cartName;
+            col[0].save((err)=>{
+                if(err){
+                    return res.send(err); 
+                }
+                return res.send({message : "success"}); 
+            }); 
+        });
+    });
+    //DMCA PRIVACY
+router.route('/updatePrivacy')
+    
+    .put((req, res)=>{
+        //getting privacy setting
+        var type = req.body.type, user = req.body.user, name = req.body.name; 
+        console.log(req.body);
+        Collection.find({name : name, user : user }, (err, col) =>{
+            if(err){
+                return res.send(err); 
+            }
+            
+            //set new privacy setting
+            col[0].ispublic = type; 
+            
+            col[0].save((err)=>{
+                if(err){
+                    res.send(err); 
+                }
+                
+                res.send({message : "success"}); 
+            });
+            
+        });
+    });
+
+router.route('/getEveryCollection')
+    
+    .post((req, res)=> {
+        //gets all collections
+        Collection.find(function(err, col){
+            if(err){
+                return res.send(err);
+            }
+            console.log(col);
+            return res.send(col); 
+            
+        }); 
+        
+    })
+
+
 
 
 

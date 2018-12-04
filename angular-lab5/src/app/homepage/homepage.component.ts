@@ -17,7 +17,8 @@ export class HomepageComponent implements OnInit {
 
   ngOnInit() {
     providers: [ItemsService]
-    var url = this._router.url;
+    var url = this._router.url; 
+
      this.itemsService.getData(this.onResponse.bind(this));
      
     

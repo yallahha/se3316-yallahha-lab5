@@ -8,7 +8,8 @@ var ItemSchema   = new Schema({
     quantity: Number,
     description : String,
     sales: Number,
-    _id: String
+    ratings: Array(5),
+    comments: Array(5)
 });
 
 

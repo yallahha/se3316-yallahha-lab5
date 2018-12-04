@@ -1,2 +1,45 @@
 <button (click) = "Logout()">Logout</button>
+<h2>
+    Items
+</h2>
+<div class = "parent">
+    <ul class = "items">
+    <li class = "itemList" *ngFor="let item of response" [class.selected] = "item === selectedItem" (click) = "onSelect(item)">
+    <b>Item:</b>
+    {{item.name}} <br>
+     <br>
+    <b>Tax: </b>
+    {{item.tax}} <br>
+    <br>
+   <b> Quantity:</b> 
+    {{item.quantity}} <br>
+     <br>
+    <b> id:</b> 
+    {{item._id}} <br>
+    <br>
+    <b> Sales:</b> 
+    {{item.sales}} <br>
+    <br>
+    </li>
+    </ul>
+</div>
 
+    <ng-container *ngIf="show">
+    <div class = "sub" >
+    <ul class = "details">
+    <li ng-repeat="let item of response">  
+    <b>Price:</b>
+    {{selectedItem.price}} <br>
+    <b>Description:</b>
+    {{selectedItem.description}} <br>
+    <b>Reviews:</b>
+    
+    <p *ngFor="let review of response">
+        Rating: {{review.rating}} <br><br>
+        Comment: {{review.comment}}<br><br>
+        User: {{review.user}} <br> <br>
+        </p>
+    </li>
+    </ul>
+    </div>
+    </ng-container>

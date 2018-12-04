@@ -4,7 +4,9 @@ var ReviewSchema   = new Schema({
     rating: Number,
     comment: String,
     user: String,
-    itemName: String
+    itemName: String,
+    ratings: Array(),
+    comments: Array()
 });
 
 
