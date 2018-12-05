@@ -18,7 +18,7 @@ mongoose.connect('mongodb://yallahha-se3316-yallahha-lab5-6575307:27017/items', 
 var Item    = require('./models/item');
 var User = require('./models/user');
 var validator = require('validator'); 
-var Review = require('./models/review');
+
 var Collection = require('./models/CartCollection');
 //var User = require('./models/userModel');
 app.use(bodyParser.urlencoded({ extended: true }));
@@ -32,7 +32,7 @@ var smtpTransport = nodemailer.createTransport({
     }
 });
 
-var randomNum,mailOptions,host,link;
+var randomNum,mailOptions,host,link, loggedUser;
 
 
 var port = 8081;        // set our port
@@ -68,6 +68,8 @@ router.route('/items')
             item.sales = req.body.sales;
             item.comments= req.body.comments;
             item.ratings=req.body.ratings;
+            item.shoppingCart = req.body.shoppingCart;
+            item.cartPrice = req.body.cartPrice;
         
         item.save(function(err) {
             if (err){
@@ -86,6 +88,15 @@ router.route('/items')
             res.json(items);
         });
 
+    });
+    router.route('/sortedItems')
+    .get(function(req, res) {
+        Item.find().sort({sales: 'descending'}).limit(10).exec(function(err, itemsFound) {
+             if (err){
+                 res.send(err);
+            }
+            res.json(itemsFound);
+        })
     });
     
    
@@ -171,27 +182,22 @@ router.route('/signup')
         var newUser = new User({
             email : email,
             password: hash, 
-            loggedIn : false, 
             isAdmin: false,
             isVerified: false,
             verificationCode: verificationCode
         });
-        User.find({'email':email}, function(err, account){
-            if(account[0] == null){
-                
-            
+        User.find({'email':email}, function(err, accFound){
+            if(accFound[0] == null){
                 //if the email isnt in use go forward with crerating account
                 newUser.save(function(err){
                     if(err){
                         res.send(err); 
                     }
-                    res.json({message: 'User created'}); 
                 });
-            }else{
-                res.send({message: 'Email already in use'});
+                res.send({message: 'User created'});
             }
-            if(err){
-                res.send(err); 
+            else{
+                res.send({message: 'Already Taken'});
             }
         });
          mailOptions={
@@ -236,6 +242,19 @@ router.route('/signup')
             
 });
 	
+	router.route('/login/:id')
+
+    //GET for ONE 
+    .get(function(req, res) {
+        Item.findOne({verificationCode: req.params.id}, function(err, Account) {
+            if (err){
+                res.send(err);
+            }
+            res.json(Account);
+            
+            res.send({message: 'Us'} , Account.verificationCode);
+        });
+    });
        
             //res.send("Email "+mailOptions.to+" is been Successfully verified");
 
@@ -245,35 +264,53 @@ router.route('/signup')
         
         //getting email and password form service
         var email = req.body.email, password = req.body.password;
+        console.log(password);
+        
         
         //checks if password is empty
         if(password == ""){
             return res.json({message: 'Password is invalid'}); 
         }
+        
         //if admin credentials have not been entered
             User.findOne({email:email}, function(err, accountFound){
+                if(err){
+                   
+                }
+                console.log(accountFound);
                 
                 //checking the username 
-                if(accountFound == null){
-                    return res.json({message: 'Username is invalid'}); 
-                }
-                
+                if(accountFound){
+                var check = bcrypt.compareSync(password, accountFound.password);
+                    if(check == false){
+                       return res.json({message: 'Wrong password'}); 
+                    }
+            
                //Confirming the account has been verified 
                 if(!(accountFound.isVerified)){
                     return res.json({message: 'You must verify your account'}); 
                 }
-                if(accountFound != null){
-                accountFound.loggedIn = true;
+                
                 //console.log(acc);
                 accountFound.save(function(err, accountFound){
                 if(err){
                // return res.send(err); 
                 }
-             res.send({message:'success', email: accountFound.email});
+                
+                
             });
-        }
+            
+            res.send({message:'success', email: accountFound.email, verificationCode: accountFound.verificationCode});
+                }
+                else {
+                    return res.json({message: "Invalid Username"});
+                }
     });
+    
+    
 });
+
+
 //GETTING A REVIEW FOR AN ITEM
 router.route('/reviews/:name')
     .get(function(req,res){
@@ -292,7 +329,8 @@ router.route('/reviews/:name')
             if(req.body.comment == null){
                  return res.json({message: 'You must enter a comment and a rating'}); 
             }
-          itemFound.comments.push(req.body.comment + JSON.stringify(user));
+           
+          itemFound.comments.push(user + ": " + req.body.comment); 
             itemFound.ratings.push(req.body.rating);  
         
         
@@ -307,188 +345,202 @@ router.route('/reviews/:name')
             return res.json({message: 'Limit of comments was reached'}); 
         }
         });
+    })
+    .delete((req, res) => {
+        
+        //finding collection by id and deleting
+        Collection.removeOne({name: req.params.name}, (err, itemFound)=> {
+            if (err) {
+                return res.send(err);
+            }
+            itemFound.comments.pop();
+            itemFound.ratings.pop();
+            return res.send({message : "success"}); 
+        })
+    });
+    
+router.route('/Buy')
+    .put(function(req, res) {
+        var itemsChosen = req.body.list;
+        var length = req.body.index;
+        for(let i = 0; i< length; i++){
+        
+        Item.findOne({name: itemsChosen[i].name}, function(err, UserFound) {
+            if(err){
+                
+            }
+        UserFound.quantity = UserFound.quantity - itemsChosen[i].quantity;
+        UserFound.sales = UserFound.quantity + itemsChosen[i].quantity;
+        UserFound.save(function(err) {
+            if (err){
+               res.send(err);
+            }
+            res.json({ message: 'Item Added!' });
+        });
+        });
+        }
     });
 //CREATING A COLLECTION
-router.route('/newCollection')
+router.route('/newCollection/:name')
 
     .post(function(req, res){
         
         //getting user, name and password form service
-        var cartUser = req.body.cartUser, cartName = req.body.cartName, desc = req.body.desc;    
+       var user = req.params.name, name = req.body.name, description = req.body.desc, visible= req.body.isprivate;   
         
         //Checking if there is already a collection with the same name and user
-        Collection.find({ cartUser : cartUser, cartName : cartName}, function(err, collections){
-            
+        console.log(user);
+        console.log(name);
+         Collection.find({collUser: user, collName : name}, function(err, collections){
+            if(collections[0] != null){
+                 return res.json({message: "You already have a collection with the same name"});
+            }
             if(err){
                 return res.send(err);
             }
-            //Check if Collection is already created with that same name
-            if(!(collections[0]==null)){
-                return res.json({message: "You already have a duplicate name collection"}); 
-            }
-            
-            //else creates a new collection with req body values
-            var collect= new Collection();
-            collect.cartUser= cartUser;
-            collect.cartName= cartName;
-            collect.desc = desc;
-            collect.isprivate= true;
-            
-            collect.save(function(err){
-                if(err)
-                    return res.send(err);
+            var coll= new Collection();
+            coll.collUser= user;
+            coll.collName= name;
+            coll.desc = description;
+            coll.isprivate= true;
+          
                 
-                res.json({message: 'success'});
+            coll.save(function(err){
+                if(err){
+                    return res.send(err);
+                }
+                
             });
-            
+            return res.send({message: 'Collection is created'});
         });
+        
     });
     
     //ROUTE TO GET ALL COLLECTIONS AND POST 
-router.route('/getAllCollections')
-    //Post 
-    .post((req, res)=> {
-        //getting user from service
-        var cartUser = req.body.cartUser;
-        //finding all collections from that user
-        Collection.find({cartUser : cartUser}, (err, col)=>{
-            if(err){
-                return res.send(err);
-            }
-            return res.send(col); 
-            
-        }); 
-        
-    })
-    //Get All
+    router.route('/getAllCollections/:name') 
     .get(function(req,res){
-       Collection.find(function(err, collections){
+        var user = req.params.name;
+        console.log(user);
+       Collection.find({collUser: user}, function(err, collections){
            if(err){
                res.send(err); 
            }
           res.json(collections); 
+         
         });
     });
     //ADD an item to the collection
-router.route('/addtoCollection')
+router.route('/addtoCollection/:name')
 
     .post((req, res)=>{
         //getting user, image and collection name from service
-        var cartUser = req.body.cartUser,cartName = req.body.cartName; 
-        
+        var user = req.params.name, name = req.body.name, CollList = req.body.collList, ind = req.body.index;
+    
+    
         //checks if collection exists
-        Collection.find({cartUser : cartUser, cartName : cartName}, (err, collections)=>{
+        Collection.findOne({collUser : user, collName : name}, (err, collections)=>{
             
             if(err){
                 return res.send(err); 
             }
-            
+            console.log(collections);
             if(collections[0] == null){
                 return res.send({message : "no collection"}); 
             }
-            
-            //else push image 
-            collections[0].save((err)=>{
-                if(err){
-                    return res.send(err);
-                }
-                return res.send({message : "success"}); 
-            }); 
-            
-        }); 
+            for(let i = 0; i< ind; i++){
         
+            Item.findOne({name: CollList[i].name, quantity: CollList.quantity}, function(err, item) {
+            if(err){
+                
+            }
+            CollList[i].push(Item);
+            item.save(function(err) {
+            if (err){
+               res.send(err);
+            }
+            res.json({ message: 'Item Added!' });
+        });
+        });
+        }
     });
-    
-router.route('/deleteItemCollection')
+    });
+router.route('/deleteItemCollection/:name')
 
     .post((req, res)=> {
         //getting user, image, name of the collaction from service
-        var cartUser = req.body.cartUser,  cartName = req.body.cartName;
+        var user = req.params.name,  name = req.body.name, CollList = req.body.collList, ind = req.body.ind;
 
         //finding collection from user
-        Collection.find({cartUser : cartUser, cartName : cartName}, (err, col)=>{
+        Collection.find({collUser: user , collName : name}, (err, col)=>{
             console.log(col[0]);
             if(err){
                 return res.send(err); 
             }
             
+  
             
             //checking if collection exists
             if(col[0] == null){
                 return res.send({message : "no collection"}); 
             }
             
-            col[0].save((err)=>{
-                if(err){
-                    return res.send(err); 
-                }
-                return res.send({message : "success"}); 
-            }); 
-            
-        }); 
-    })
-
-router.route('/deleteCollection:id')
-
-    .delete((req, res) => {
+            for(let i = 0; i< ind; i++){
         
-        //finding collection by id and deleting
-        Collection.remove({_id: req.params.id}, (err, col)=> {
-            if (err) {
-                return res.send(err);
-            }
-            return res.send({message : "success"}); 
-        })
-    })
-
-router.route('/saveCollection')
-
-    .put((req, res)=> {
-        //getting user the old name of the collection, the new name of the collection and the description of the collection
-        var cartUser = req.body.user, oldname = req.body.oldname, cartName = req.body.cartName, desc = req.body.desc;
-        
-        console.log('server oldname & user', oldname, cartUser);
-        Collection.find({cartUser : cartUser, cartName : oldname}, (err, col)=>{
+            Item.findOne({name: CollList[i].name, quantity: CollList.quantity}, function(err, item) {
             if(err){
-                return res.send(err); 
+                
             }
-            
-            //saving new name and description for collection
-            col[0]['desc'] = desc;
-            col[0]['cartName'] = cartName;
-            col[0].save((err)=>{
-                if(err){
-                    return res.send(err); 
-                }
-                return res.send({message : "success"}); 
-            }); 
+            CollList[i].pop(Item);
+            Item.save(function(err) {
+            if (err){
+               res.send(err);
+            }
+            res.json({ message: 'Item Added!' });
+        });
+        });
+        }
+    });
+    });
+
+router.route('/deleteCollection/:id')
+
+   .delete(function(req, res) {
+        Collection.remove({
+            _id: req.params.item_id
+        }, function(err, item) {
+            if (err){
+                res.send(err);
+            }
+            res.json({ message: 'Successfully deleted' });
         });
     });
-    //DMCA PRIVACY
-router.route('/updatePrivacy')
-    
-    .put((req, res)=>{
-        //getting privacy setting
-        var type = req.body.type, user = req.body.user, name = req.body.name; 
-        console.log(req.body);
-        Collection.find({name : name, user : user }, (err, col) =>{
-            if(err){
-                return res.send(err); 
-            }
-            
-            //set new privacy setting
-            col[0].ispublic = type; 
-            
-            col[0].save((err)=>{
+
+router.route('/saveCollection/:name')
+
+    .put(function(req, res){
+        //getting user the old name of the collection, the new name of the collection and the description of the collection
+        var user = req.params.name,  name = req.body.oldname, newname = req.body.newname, desc = req.body.desc, isprivate = req.body.isprivate;
+        
+        //if admin credentials have not been entered
+            Collection.find({collUser:user, collName: name}, function(err, col){
                 if(err){
-                    res.send(err); 
+                   
                 }
                 
-                res.send({message : "success"}); 
-            });
+                col.collName = newname;
+                col.desc = desc;
+                col.isprivate = isprivate;
             
-        });
+                col.save(function(err, col){
+                if(err){
+                
+                    }
+                     res.send({message: "Successfully Updated"});
+                });
+    
     });
+    
+});
 
 router.route('/getEveryCollection')
     
@@ -503,7 +555,9 @@ router.route('/getEveryCollection')
             
         }); 
         
-    })
+    });
+    
+
 
 
 

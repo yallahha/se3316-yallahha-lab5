@@ -2,8 +2,8 @@ var mongoose = require('mongoose');
 var Schema = mongoose.Schema;
 
 var CartCollectionSchema = new Schema ({
-    cartUser: String,
-    cartName: String,
+    collUser: String,
+    collName: String,
     desc: String,
     isprivate: Boolean,
     items : Array()

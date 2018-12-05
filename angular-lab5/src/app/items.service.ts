@@ -6,14 +6,14 @@ import { HttpClient } from '@angular/common/http';
 export class ItemsService {
 
 constructor(private http: HttpClient) { }
-  getData(callback_fun) {
-  this.http.get('/api/items').subscribe(data => {
+  getSortedData(callback_fun) {
+  this.http.get('/api/sortedItems').subscribe(data => {
           console.log(data);
          callback_fun(data);
       });
   }
-  Adddata(callback_fun,p_name: string, p_price: number, f_tax: number, f_quantity:number){
-    this.http.post('/api/items', {name: p_name, price: p_price, quantity: f_quantity, tax: f_tax}).subscribe(data => {
+  Adddata(callback_fun, fitemname: string, fuser: string, fcomment: string, frating:number){
+    this.http.post('/api/reviews/' + fitemname, {email: fuser, comment: fcomment, rating: frating}).subscribe(data => {
           console.log("POST success!");
           callback_fun(data);
       });
@@ -26,4 +26,29 @@ constructor(private http: HttpClient) { }
          callback_fun(data);
       });
   }
+   getData(callback_fun) {
+  this.http.get('/api/items').subscribe(data => {
+          console.log(data);
+         callback_fun(data);
+      });
+  }
+  getAllCollections(callback_fun, user){
+     this.http.get('/api/getAllCollections/' + user).subscribe(data => {
+       console.log(data);
+       callback_fun(data['message']);
+     });
+  }
+  collectionCreate(callback_fun, user,name, desc, isprivate){
+    this.http.post('/api/newCollection/:' + user, {cartName: name, desc: desc, isprivate: isprivate}).subscribe(data => {
+      
+       callback_fun(data['message']);
+       
+    });
+  }
+  allPubColls(callback_fun){
+    this.http.get('/api/getEveryCollection').subscribe(data => {
+       console.log(data);
+       callback_fun(data['message']);
+  });
+}
 }

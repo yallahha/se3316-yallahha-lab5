@@ -9,7 +9,8 @@ var ItemSchema   = new Schema({
     description : String,
     sales: Number,
     ratings: Array(5),
-    comments: Array(5)
+    comments: Array(5),
+    hidden: Boolean
 });
 
 

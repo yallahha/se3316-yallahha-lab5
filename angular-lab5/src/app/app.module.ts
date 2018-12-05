@@ -13,7 +13,6 @@ import {BrowserAnimationsModule} from '@angular/platform-browser/animations';
 import {FormsModule} from "@angular/forms";
 import { ManagerComponent } from './manager/manager.component';
 import { CartCollectionComponent } from './cart-collection/cart-collection.component';
-import { UserComponent } from './user/user.component';
 
 
 @NgModule({
@@ -26,8 +25,6 @@ import { UserComponent } from './user/user.component';
     UserhomeComponent,
     ManagerComponent,
     CartCollectionComponent,
-    UserComponent
-    
   ],
   imports: [
     BrowserModule,
@@ -53,12 +50,16 @@ import { UserComponent } from './user/user.component';
       component: VerifyUserComponent
       }, 
       {
-        path: 'userhome',
+        path: 'userhome/:id',
         component: UserhomeComponent
       },
       {
         path: 'manager',
         component : ManagerComponent
+      },
+      {
+        path: 'pubCollections',
+        component: CartCollectionComponent
       }
       ])
       

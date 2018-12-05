@@ -30,23 +30,19 @@
     <br>
     </li>
     </ul>
-</div>
+
 
     <ng-container *ngIf="show">
     <div class = "sub" >
     <ul class = "details">
-    <li ng-repeat="let item of response">  
+    <li ng-repeat="let item of response2">  
     <b>Price:</b>
     {{selectedItem.price}} <br>
     <b>Description:</b>
     {{selectedItem.description}} <br>
-    <b>Reviews:</b>
-    
-    <p *ngFor="let review of response">
-        Rating: {{review.rating}} <br><br>
-        Comment: {{review.comment}}<br><br>
-        User: {{review.user}} <br> <br>
-        </p>
+    <b>Reviews:</b> <br>
+        Rating: {{selectedItem.ratings}} <br><br>
+        Comment: {{selectedItem.comments}}<br><br>
     </li>
     </ul>
     </div>

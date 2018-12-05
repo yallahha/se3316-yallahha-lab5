@@ -1,4 +1,34 @@
 <button (click) = "Logout()">Logout</button>
+<button (click) = "addACollection()">Create a new collection</button>
+<button (click) = "editCollection()"></button>
+<button (click) = "allPublic()"> View All </button>
+  <div *ngIf = "toCreateNC">
+        Name of the Collection:
+        <input #name type ="text" > <br>
+        Description of Collection: 
+        <input #desc type = "text"> <br>
+        Visiablity: 
+        <input type="checkbox" #isprivate value = "true">
+        
+        <button (click) = "createCollection(name.value, desc.value, isprivate.value)">Save</button>
+        
+    </div>
+   
+         <div>
+        <ul>
+        <li ng-repeat = "let collection of response3">
+        Name of the Collection: 
+        {{collection.collName}} <br>
+        Description of Collection: 
+        {{collection.desc}}<br>
+        Visiablity: 
+        {{collection.isprivate}}<br>
+        
+        <button (click) = "createCollection(name.value, desc.value, isprivate.value)">Edit</button>
+        </li>
+        </ul>
+        </div>
+
 <h2>
     Items
 </h2>
@@ -13,6 +43,7 @@
     <br>
    <b> Quantity:</b> 
     {{item.quantity}} <br>
+    <input>
      <br>
     <b> id:</b> 
     {{item._id}} <br>
@@ -22,24 +53,42 @@
     <br>
     </li>
     </ul>
-</div>
 
     <ng-container *ngIf="show">
     <div class = "sub" >
     <ul class = "details">
-    <li ng-repeat="let item of response">  
+    <li ng-repeat="let item of response2">  
     <b>Price:</b>
     {{selectedItem.price}} <br>
     <b>Description:</b>
     {{selectedItem.description}} <br>
-    <b>Reviews:</b>
-    
-    <p *ngFor="let review of response">
-        Rating: {{review.rating}} <br><br>
-        Comment: {{review.comment}}<br><br>
-        User: {{review.user}} <br> <br>
-        </p>
-    </li>
+    <b>Reviews:</b> <br>
+        Rating: {{selectedItem.rating}} <br><br>
+        Comment: {{selectedItem.comment}}<br><br>
+
+
+        <h4>Create a comment: </h4>
+        <label>User:</label>
+        <input #username> 
+        <label>Comment: </label>
+        <input #comment>
+        <label>Rating: </label>
+        <input #rating>
+        <button id = "Add Comment" (click) = "addComment(selectedItem.name, username.value,comment.value, rating.value)">Add Comment</button>
+
+    </li>    
     </ul>
     </div>
     </ng-container>
+    <h2>
+        Your Shopping Cart 
+    </h2>
+    <div id = "Shopping Cart">
+        <ul class = "items">
+            <li *ngFor="let item of shopCart">
+               Item: {{item.name}}
+            Quantity:{{item.quantity}}
+            Price{{item.price}}
+            </li>
+        </ul>
+    </div>

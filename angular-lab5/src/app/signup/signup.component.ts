@@ -30,14 +30,14 @@ export class SignupComponent implements OnInit {
  onResponse(res: string) {
     this.response = res;
     if(res == "User created"){
-      console.log('user created');
+      alert('user created');
       this._router.navigateByUrl('verify');
     }
-    if(res == "Enter password"){
+    else if(res == "Enter password"){
       alert("Enter a password");
     }
-    if ('Email already in use'){
-      alert('Email already in use');
+    else if(res == "Already Taken"){
+       alert("Already Taken");
     }
  }
   
