@@ -21,6 +21,7 @@ export class HomepageComponent implements OnInit {
     providers: [ItemsService];
 
      this.itemsService.getSortedData(this.onResponse.bind(this));
+     this.itemsService.getData(this.onResponse3.bind(this));
      
     
    // this.username= url.substr((url.indexOf(':')+1), url.length);
@@ -39,7 +40,7 @@ export class HomepageComponent implements OnInit {
        this.response2 = res;
    }
    onResponse3(res: Observable<any[]>){
-       this.response2 = res;
+       this.response3 = res;
    }
   
   selectedItem: Item;
@@ -50,7 +51,7 @@ export class HomepageComponent implements OnInit {
     
   }
   viewAllItems(){
-      this.itemsService.getData(this.onResponse3.bind(this));
+      
   }
   
 

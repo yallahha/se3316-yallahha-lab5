@@ -80,7 +80,7 @@ router.route('/items')
     })
     //get FOR ALL
     .get(function(req, res) {
-        Item.find(function(err, items) {
+        Item.find({quantity: {$gte: 1}}).exec(function(err, items) {
             //Item.name = req.body.name;
             if (err){
                  res.send(err);
@@ -349,7 +349,7 @@ router.route('/reviews/:name')
     .delete((req, res) => {
         
         //finding collection by id and deleting
-        Collection.removeOne({name: req.params.name}, (err, itemFound)=> {
+        User.removeOne({name: req.params.name}, (err, itemFound)=> {
             if (err) {
                 return res.send(err);
             }
@@ -477,7 +477,6 @@ router.route('/deleteItemCollection/:name')
                 return res.send(err); 
             }
             
-  
             
             //checking if collection exists
             if(col[0] == null){
@@ -527,6 +526,7 @@ router.route('/saveCollection/:name')
                    
                 }
                 
+                if(col){
                 col.collName = newname;
                 col.desc = desc;
                 col.isprivate = isprivate;
@@ -537,7 +537,8 @@ router.route('/saveCollection/:name')
                     }
                      res.send({message: "Successfully Updated"});
                 });
-    
+            }
+            
     });
     
 });
@@ -556,6 +557,7 @@ router.route('/getEveryCollection')
         }); 
         
     });
+    
     
 
 

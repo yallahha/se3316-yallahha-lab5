@@ -12,7 +12,13 @@ constructor(private http: HttpClient) { }
          callback_fun(data);
       });
   }
-  Adddata(callback_fun, fitemname: string, fuser: string, fcomment: string, frating:number){
+  getData(callback_fun){
+    this.http.get("/api/items").subscribe(data => {
+          console.log(data);
+         callback_fun(data);
+      });
+  }
+Adddata(callback_fun, fitemname: string, fuser: string, fcomment: string, frating:number){
     this.http.post('/api/reviews/' + fitemname, {email: fuser, comment: fcomment, rating: frating}).subscribe(data => {
           console.log("POST success!");
           callback_fun(data);
@@ -26,12 +32,7 @@ constructor(private http: HttpClient) { }
          callback_fun(data);
       });
   }
-   getData(callback_fun) {
-  this.http.get('/api/items').subscribe(data => {
-          console.log(data);
-         callback_fun(data);
-      });
-  }
+
   getAllCollections(callback_fun, user){
      this.http.get('/api/getAllCollections/' + user).subscribe(data => {
        console.log(data);
@@ -45,6 +46,7 @@ constructor(private http: HttpClient) { }
        
     });
   }
+  
   allPubColls(callback_fun){
     this.http.get('/api/getEveryCollection').subscribe(data => {
        console.log(data);

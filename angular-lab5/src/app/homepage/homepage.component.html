@@ -5,14 +5,31 @@
 <div align = "right">
 <button id = "login" (click) = "toLogIn()"> Login</button>
 <button id = "signup" (click) = "toSignUp()">Sign-Up</button>
-<button (click) = viewAllItems()> View Entire Catologue</button>
 </div>
 <h2>
-    Items
+    List of Popular Items
 </h2>
-<div class = "parent">
+
     <ul class = "items">
-    <li class = "itemList" *ngFor="let item of response" [class.selected] = "item === selectedItem" (click) = "onSelect(item)">
+    <li *ngFor = "let popularItems of response">
+    <b>Item:</b>
+    {{popularItems.name}} <br>
+     <br>
+   <b> Quantity:</b> 
+    {{popularItems.quantity}} <br>
+     <br>
+    <b> Sales:</b> 
+    {{popularItems.sales}} <br>
+    <br>
+    </li>
+    </ul>
+    
+    <h1>
+        Entire Catologue
+    </h1>
+    <div>
+    <ul>
+    <li class = "itemList" *ngFor="let item of response3" [class.selected] = "item === selectedItem" (click) = "onSelect(item)">
     <b>Item:</b>
     {{item.name}} <br>
      <br>
@@ -22,20 +39,17 @@
    <b> Quantity:</b> 
     {{item.quantity}} <br>
      <br>
-    <b> id:</b> 
-    {{item._id}} <br>
-    <br>
     <b> Sales:</b> 
     {{item.sales}} <br>
     <br>
     </li>
     </ul>
-
-
-    <ng-container *ngIf="show">
+    </div>
+    
+    
+     <ng-container *ngIf="show">
     <div class = "sub" >
     <ul class = "details">
-    <li ng-repeat="let item of response2">  
     <b>Price:</b>
     {{selectedItem.price}} <br>
     <b>Description:</b>
@@ -43,7 +57,6 @@
     <b>Reviews:</b> <br>
         Rating: {{selectedItem.ratings}} <br><br>
         Comment: {{selectedItem.comments}}<br><br>
-    </li>
     </ul>
     </div>
     </ng-container>
