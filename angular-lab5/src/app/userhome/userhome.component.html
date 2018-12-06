@@ -8,26 +8,12 @@
         Description of Collection: 
         <input #desc type = "text"> <br>
         Visiablity: 
-        <input type="checkbox" #isprivate value = "true">
+        <input type="checkbox" #isprivate  value = "true">
         
         <button (click) = "createCollection(name.value, desc.value, isprivate.value)">Save</button>
         
     </div>
-   
-         <div>
-        <ul>
-        <li ng-repeat = "let collection of response3">
-        Name of the Collection: 
-        {{collection.collName}} <br>
-        Description of Collection: 
-        {{collection.desc}}<br>
-        Visiablity: 
-        {{collection.isprivate}}<br>
-        
-        <button (click) = "createCollection(name.value, desc.value, isprivate.value)">Edit</button>
-        </li>
-        </ul>
-        </div>
+  
 
 <h2>
     Items
@@ -43,11 +29,9 @@
     <br>
    <b> Quantity:</b> 
     {{item.quantity}} <br>
-    <input>
+    <input type="number" #quantity min="1">
+    <button (click)=addtoCart(item.name,item.price,quantity.value,item.quantity)>Add To Cart</button> 
      <br>
-    <b> id:</b> 
-    {{item._id}} <br>
-    <br>
     <b> Sales:</b> 
     {{item.sales}} <br>
     <br>
@@ -57,7 +41,7 @@
     <ng-container *ngIf="show">
     <div class = "sub" >
     <ul class = "details">
-    <li ng-repeat="let item of response2">  
+        <li>
     <b>Price:</b>
     {{selectedItem.price}} <br>
     <b>Description:</b>
@@ -84,11 +68,32 @@
         Your Shopping Cart 
     </h2>
     <div id = "Shopping Cart">
-        <ul class = "items">
+        <ul>
             <li *ngFor="let item of shopCart">
                Item: {{item.name}}
             Quantity:{{item.quantity}}
             Price{{item.price}}
+            <input type="number" #edit min="1" placeholder="{{ item.quantity }}"><button (click)=editquan(item.name,edit.value)>Edit </button>
+            <button (click)=remove(item.name)>Remove From Cart</button>
             </li>
         </ul>
+        <button (click)="empty()">Empty the Cart</button>
+    <h3>Total: {{ price }}</h3>
+    <button (click)="buy()">Buy</button>
     </div>
+    <div *ngIf="recipt">
+    <h3>Receipt</h3>
+    <ol>
+        <li *ngFor="let item of receiptcart">
+            <b>Name</b>:
+            {{ item.name }}
+            <br>
+            <b>Price</b>:
+            {{ item.price }}
+            <br>
+            <b>Quantity</b>:
+            {{ item.quantity }}
+        </li>
+    </ol>
+    <h4>Receipt Total: {{ finalTotal }}</h4>
+</div>

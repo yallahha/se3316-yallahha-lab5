@@ -43,6 +43,10 @@ export class LoginComponent implements OnInit {
     else if(res == "Wrong password"){
         alert('Password is invalid');
     }
+    else if(res == "Welcome Admin"){
+        alert("Welcome Admin");
+        this.router.navigateByUrl('manager');
+    }
     
   }
 }

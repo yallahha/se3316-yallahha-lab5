@@ -12,8 +12,21 @@ constructor(private http: HttpClient) { }
          callback_fun(data);
       });
   }
+  BuyCart(list, listsize, callback_fun){
+      this.http.post('/api/Buy/', {list: list, index:listsize}).subscribe(data => {
+          console.log("POST success!");
+          console.log(data)
+          callback_fun(data);
+      });
+  }
   getData(callback_fun){
     this.http.get("/api/items").subscribe(data => {
+          console.log(data);
+         callback_fun(data);
+      });
+  }
+   getDataAdmin(callback_fun){
+    this.http.get("/api/Admin").subscribe(data => {
           console.log(data);
          callback_fun(data);
       });
@@ -53,4 +66,12 @@ Adddata(callback_fun, fitemname: string, fuser: string, fcomment: string, fratin
        callback_fun(data['message']);
   });
 }
+AdddataAdmin(callback_fun, fitemname: string, fprice: number, fquantity: number, fdesc:string){
+  console.log(fitemname, fprice, fquantity, fdesc);
+    this.http.post('/api/Admin', {name:fitemname , price: fprice, quantity: fquantity, description: fdesc}).subscribe(data => {
+          console.log("POST success!");
+          callback_fun(data['message']);
+      });
+      
+  }
 }

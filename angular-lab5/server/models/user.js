@@ -7,6 +7,7 @@ var UserSchema   = new Schema({
     isVerified: Boolean,
     isAdmin: Boolean,
     verificationCode: String,
+    isActive: Boolean
 });
 
 

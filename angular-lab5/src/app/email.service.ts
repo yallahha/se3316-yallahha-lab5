@@ -30,6 +30,7 @@ export class EmailService {
             callback_fun(data['message']);
         }); 
     }
+    
   //validates account
   Validate(callback_fun, email, psw){
       this.http.post('/api/login', {'email' : email, 'password' : psw}).subscribe(data=>{
@@ -54,8 +55,11 @@ export class EmailService {
             callback(data['message']); 
         });
     }*/
-    getUsername(callback_fun, ){
-      
-    }
+    getAllUsers(callback_fun){
+        this.http.get('/api/signup').subscribe(data=>{
+          console.log(data);
+            callback_fun(data['message']);
+        }); 
+  }
 }
  

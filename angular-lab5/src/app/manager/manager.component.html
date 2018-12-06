@@ -1,0 +1,49 @@
+<h2>
+   All Items
+</h2>
+<div class = "parent">
+    <ul class = "items">
+    <li class = "itemList" *ngFor="let item of response3">
+    <b>Item:</b>
+    {{item.name}} <br>
+     <br>
+    <b>Tax: </b>
+    {{item.tax}} <br>
+    <br>
+   <b> Quantity:</b> 
+    {{item.quantity}} <br>
+     <br>
+    <b> Sales:</b> 
+    {{item.sales}} <br>
+    <br>
+    <b> Price:</b> 
+    {{item.price}} <br>
+    <br>
+    <b> sales:</b> 
+    {{item.sales}} <br>
+    <br>
+    </li>
+</ul>
+<div>
+    <h2>Add an Item</h2>
+    Item Name: 
+    <input #name>
+    Item Price: 
+    <input #price type = "number">
+    Item Quantity:
+    <input #quantity type="number" name=""/>
+    Item Description:
+    <input #desc type = "text">
+    
+    <button (click) = "saveItem(name.value, price.value, quantity.value, desc.value)"> Save</button>
+</div>
+
+
+     Users
+<ul>
+<li *ngFor= "let user of response">
+    {{user.email}}<br>
+    {{user.isAdmin}}
+    {{user.isActive}}
+    </li>
+    </ul>

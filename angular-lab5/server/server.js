@@ -184,6 +184,7 @@ router.route('/signup')
             password: hash, 
             isAdmin: false,
             isVerified: false,
+            isActive: false,
             verificationCode: verificationCode
         });
         User.find({'email':email}, function(err, accFound){
@@ -194,6 +195,7 @@ router.route('/signup')
                         res.send(err); 
                     }
                 });
+           
                 res.send({message: 'User created'});
             }
             else{
@@ -217,9 +219,10 @@ router.route('/signup')
 .get(function(req,res){
        User.find(function(err, accounts){
            if(err){
-               res.send(err); 
+           return    res.send(err); 
            }
-          res.json(accounts); 
+           console.log(accounts);
+          return res.json(accounts); 
         });
     });
     
@@ -241,20 +244,7 @@ router.route('/signup')
     });
             
 });
-	
-	router.route('/login/:id')
 
-    //GET for ONE 
-    .get(function(req, res) {
-        Item.findOne({verificationCode: req.params.id}, function(err, Account) {
-            if (err){
-                res.send(err);
-            }
-            res.json(Account);
-            
-            res.send({message: 'Us'} , Account.verificationCode);
-        });
-    });
        
             //res.send("Email "+mailOptions.to+" is been Successfully verified");
 
@@ -290,6 +280,9 @@ router.route('/signup')
                 if(!(accountFound.isVerified)){
                     return res.json({message: 'You must verify your account'}); 
                 }
+                if(accountFound.isAdmin == true){
+                    return res.json({message: "Welcome Admin"});
+                }
                 
                 //console.log(acc);
                 accountFound.save(function(err, accountFound){
@@ -299,7 +292,7 @@ router.route('/signup')
                 
                 
             });
-            
+                
             res.send({message:'success', email: accountFound.email, verificationCode: accountFound.verificationCode});
                 }
                 else {
@@ -358,6 +351,37 @@ router.route('/reviews/:name')
             return res.send({message : "success"}); 
         })
     });
+    router.route('/Admin')
+    .post(function(req, res) {
+        var item = new Item();
+         item.name = req.body.name; 
+            item.price = req.body.price;
+            item.tax = req.body.tax;
+            item.quantity = req.body.quantity;
+            item.description = req.body.description;
+            item.sales = req.body.sales;
+            item.comments= req.body.comments;
+            item.ratings=req.body.ratings;
+            item.shoppingCart = req.body.shoppingCart;
+            item.cartPrice = req.body.cartPrice;
+        
+        item.save(function(err) {
+            if (err){
+           return    res.send(err);
+            }
+          return  res.json({ message: 'Item created!' });
+        });
+    })
+    .get(function(req, res) {
+        Item.find(function(err, items) {
+            //Item.name = req.body.name;
+            if (err){
+                 res.send(err);
+            }
+            res.json(items);
+        });
+
+    });
     
 router.route('/Buy')
     .put(function(req, res) {
@@ -367,7 +391,7 @@ router.route('/Buy')
         
         Item.findOne({name: itemsChosen[i].name}, function(err, UserFound) {
             if(err){
-                
+                res.send(err);
             }
         UserFound.quantity = UserFound.quantity - itemsChosen[i].quantity;
         UserFound.sales = UserFound.quantity + itemsChosen[i].quantity;
@@ -375,11 +399,12 @@ router.route('/Buy')
             if (err){
                res.send(err);
             }
-            res.json({ message: 'Item Added!' });
-        });
-        });
+            });
+            });
         }
+        res.json({ message: 'Item Added!' });
     });
+    
 //CREATING A COLLECTION
 router.route('/newCollection/:name')
 
@@ -430,119 +455,6 @@ router.route('/newCollection/:name')
         });
     });
     //ADD an item to the collection
-router.route('/addtoCollection/:name')
-
-    .post((req, res)=>{
-        //getting user, image and collection name from service
-        var user = req.params.name, name = req.body.name, CollList = req.body.collList, ind = req.body.index;
-    
-    
-        //checks if collection exists
-        Collection.findOne({collUser : user, collName : name}, (err, collections)=>{
-            
-            if(err){
-                return res.send(err); 
-            }
-            console.log(collections);
-            if(collections[0] == null){
-                return res.send({message : "no collection"}); 
-            }
-            for(let i = 0; i< ind; i++){
-        
-            Item.findOne({name: CollList[i].name, quantity: CollList.quantity}, function(err, item) {
-            if(err){
-                
-            }
-            CollList[i].push(Item);
-            item.save(function(err) {
-            if (err){
-               res.send(err);
-            }
-            res.json({ message: 'Item Added!' });
-        });
-        });
-        }
-    });
-    });
-router.route('/deleteItemCollection/:name')
-
-    .post((req, res)=> {
-        //getting user, image, name of the collaction from service
-        var user = req.params.name,  name = req.body.name, CollList = req.body.collList, ind = req.body.ind;
-
-        //finding collection from user
-        Collection.find({collUser: user , collName : name}, (err, col)=>{
-            console.log(col[0]);
-            if(err){
-                return res.send(err); 
-            }
-            
-            
-            //checking if collection exists
-            if(col[0] == null){
-                return res.send({message : "no collection"}); 
-            }
-            
-            for(let i = 0; i< ind; i++){
-        
-            Item.findOne({name: CollList[i].name, quantity: CollList.quantity}, function(err, item) {
-            if(err){
-                
-            }
-            CollList[i].pop(Item);
-            Item.save(function(err) {
-            if (err){
-               res.send(err);
-            }
-            res.json({ message: 'Item Added!' });
-        });
-        });
-        }
-    });
-    });
-
-router.route('/deleteCollection/:id')
-
-   .delete(function(req, res) {
-        Collection.remove({
-            _id: req.params.item_id
-        }, function(err, item) {
-            if (err){
-                res.send(err);
-            }
-            res.json({ message: 'Successfully deleted' });
-        });
-    });
-
-router.route('/saveCollection/:name')
-
-    .put(function(req, res){
-        //getting user the old name of the collection, the new name of the collection and the description of the collection
-        var user = req.params.name,  name = req.body.oldname, newname = req.body.newname, desc = req.body.desc, isprivate = req.body.isprivate;
-        
-        //if admin credentials have not been entered
-            Collection.find({collUser:user, collName: name}, function(err, col){
-                if(err){
-                   
-                }
-                
-                if(col){
-                col.collName = newname;
-                col.desc = desc;
-                col.isprivate = isprivate;
-            
-                col.save(function(err, col){
-                if(err){
-                
-                    }
-                     res.send({message: "Successfully Updated"});
-                });
-            }
-            
-    });
-    
-});
-
 router.route('/getEveryCollection')
     
     .post((req, res)=> {
